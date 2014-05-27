@@ -79,9 +79,9 @@ public class Cache_TransferRequestHandler implements Runnable{
 			for (Map.Entry<String, String> e : Cache_Server.c.getAll())
 			      System.out.println (e.getKey() + " : " + e.getValue());
 			System.out.println("ESTADISTICAS");
-			System.out.println("      PETICIONES    - > "+Cache_Server.peticiones+ "      bytes ->" + Cache_Server.peticiones_bytes);
-			System.out.println("      ACIERTOS      - > "+ Cache_Server.hit + "      bytes ->" + Cache_Server.hits_bytes);
-			System.out.println("      P. ACIERTOS   - > " + porc + " %" + "   bytes ->" + porc_bytes + " %");
+			System.out.println("      PETICIONES    - > "+Cache_Server.peticiones+ "               bytes ->" + Cache_Server.peticiones_bytes);
+			System.out.println("      ACIERTOS      - > "+ Cache_Server.hit + "               bytes ->" + Cache_Server.hits_bytes);
+			System.out.println("      P. ACIERTOS   - > " + porc + " %" + "               bytes ->" + porc_bytes + " %");
 			
 			SendFile(file,dout);
 			return "Procesado";
