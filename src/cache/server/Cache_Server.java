@@ -14,6 +14,8 @@ public class Cache_Server extends Thread
 	static int peticiones=0;
 	static int hit=0;
 	static  LRUCache<String,String> c = new LRUCache<String, String>(100);
+	static long peticiones_bytes=0;
+	static long hits_bytes=0;
 	final static int _transferPort = 60000;
 	private Socket cache_transfersocket = null;
 	private ServerSocket cachetransferSocket = null;
