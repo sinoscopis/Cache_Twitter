@@ -30,7 +30,7 @@ public class Cache_TransferRequestHandler implements Runnable{
 				{
 					try
 					{
-					System.out.println("Waiting for Command ...");
+					System.out.println("Waiting for Command Cache...");
 					String Command=din.readUTF();
 					if(Command.compareTo("GET")==0)
 					{
@@ -46,6 +46,8 @@ public class Cache_TransferRequestHandler implements Runnable{
 					}
 					catch(Exception ex)
 					{
+						break;
+						//ex.printStackTrace();
 					}
 				}
 				
@@ -99,11 +101,12 @@ public class Cache_TransferRequestHandler implements Runnable{
 			File f=new File(file_path);			
 			if(!f.exists())
 			{
-				dout.writeUTF("Error");
+				dout.writeUTF("File Not Found");
 			}
 			else
 			{
 				dout.writeUTF("READY");
+				System.out.println("Sending File ...");
 				FileInputStream fin=new FileInputStream(f);
 				int ch;
 				do
