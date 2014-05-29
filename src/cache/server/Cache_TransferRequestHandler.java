@@ -5,11 +5,13 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Map;
 
 public class Cache_TransferRequestHandler implements Runnable{
+		
+		static String server_ip;
+	
 		private Socket _socket = null;
 		private DataOutputStream dout = null;
 		private DataInputStream din = null;
@@ -128,8 +130,8 @@ public class Cache_TransferRequestHandler implements Runnable{
 			//BufferedReader br;
 			try{
 			
-				InetAddress host = InetAddress.getLocalHost();
-				ClientSoc = new Socket(host.getHostName(), 55055);
+				//InetAddress host = InetAddress.getLocalHost();
+				ClientSoc = new Socket(server_ip, 55055);
 				
 				din=new DataInputStream(ClientSoc.getInputStream());
 				dout=new DataOutputStream(ClientSoc.getOutputStream());

@@ -13,7 +13,8 @@ public class Cache_Server extends Thread
 { //Arbitrary port number
 	static int peticiones=0;
 	static int hit=0;
-	static  LRUCache<String,String> c = new LRUCache<String, String>(100);
+	static int cache_lines;
+	static  LRUCache<String,String> c = new LRUCache<String, String>(cache_lines);
 	static long peticiones_bytes=0;
 	static long hits_bytes=0;
 	final static int _transferPort = 60000;
@@ -21,6 +22,21 @@ public class Cache_Server extends Thread
 	private ServerSocket cachetransferSocket = null;
 
 	public static void main(String[] args) {
+		
+		if (args.length > 0) {
+		    try {
+		    	cache_lines = Integer.parseInt(args[0]);
+		    	Cache_TransferRequestHandler.server_ip = args[1];
+		    } catch (Exception e) {
+		        System.err.println("Cache_Server.jar cache_lines Server_IP");
+		    }
+		}
+		else{
+			System.err.println("Cache_Server.jar cache_lines Server_IP");
+			System.exit(1);
+		}
+		
+		
 		new Cache_Server().run();
 	}
 	public void run() {
