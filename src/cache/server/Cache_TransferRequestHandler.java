@@ -147,7 +147,14 @@ public class Cache_TransferRequestHandler implements Runnable{
 		
 		public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String filename) throws Exception
 		{
-			String file_path = "C:\\Users\\Alberto\\workspace\\Cache_Twitter\\cache_Content\\"+filename;
+			String sSistemaOperativo = System.getProperty("os.name");
+			String file_path = null;
+			if(sSistemaOperativo.startsWith("Win")){
+				file_path = ".\\Cache_Content\\"+filename;
+			}
+			else {
+				file_path = "./Cache_Content/"+filename;
+			}
 			dout.writeUTF(filename);
 			String msgFromServer=din.readUTF();
 			
