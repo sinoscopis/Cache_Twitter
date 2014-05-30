@@ -92,14 +92,28 @@ public class Cache_TransferRequestHandler implements Runnable{
 		}
 		
 		private static long Procesarbytes(String file) {
-			String file_path = "C:\\Users\\Alberto\\workspace\\Cache_Twitter\\cache_Content\\"+file;
+			String sSistemaOperativo = System.getProperty("os.name");
+			String file_path = null;
+			if(sSistemaOperativo.startsWith("Win")){
+				file_path = ".\\Cache_Content\\"+file;
+			}
+			else {
+				file_path = "./Cache_Content/"+file;
+			}
 			File f=new File(file_path);
 			return f.length();
 		}
 
 		static void SendFile(String filename, DataOutputStream dout) throws Exception
 		{		
-			String file_path = "C:\\Users\\Alberto\\workspace\\Cache_Twitter\\cache_Content\\"+filename;
+			String sSistemaOperativo = System.getProperty("os.name");
+			String file_path = null;
+			if(sSistemaOperativo.startsWith("Win")){
+				file_path = ".\\Cache_Content\\"+filename;
+			}
+			else {
+				file_path = "./Cache_Content/"+filename;
+			}
 			File f=new File(file_path);			
 			if(!f.exists())
 			{
