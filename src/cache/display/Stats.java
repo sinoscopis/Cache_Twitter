@@ -5,10 +5,14 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 
 import java.awt.Font;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.swing.SwingConstants;
 
 import cache.server.Cache_Server;
+import java.awt.Component;
+import javax.swing.Box;
 
 public class Stats extends JFrame {
 	
@@ -24,7 +28,7 @@ public class Stats extends JFrame {
 	private final JLabel lblNumeric = new JLabel("Numeric");
 	private final JLabel lblSizebytes = new JLabel("Size (bytes)");
 	private final JLabel lblHits = new JLabel("Hits");
-	private final JLabel lblHitsRatio = new JLabel("Hits Ratio");
+	private final JLabel lblHitsRatio = new JLabel("Hits Ratio (%)");
 	private final JLabel lblPetitions_number = new JLabel("Petitions");
 	private final JLabel lblHitsnumber = new JLabel("Hits_number");
 	private final JLabel lblHitsrationumber = new JLabel("Hits_ratio_number");
@@ -36,15 +40,23 @@ public class Stats extends JFrame {
 		initGUI();
 	}
 	private void initGUI() {
-		setTitle("Cache on ip.ip.ip.ip Stats");
+		setSize(800, 500);
+		setVisible(true);
+		InetAddress host = null;
+		try {
+			host = InetAddress.getLocalHost();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		setTitle("Cache on "+ host.getHostAddress() +" Stats");
 		getContentPane().setLayout(null);
-		Stats.setBounds(0, 11, 327, 233);
+		Stats.setBounds(0, 11, 382, 233);
 		
 		getContentPane().add(Stats);
 		Stats.setLayout(null);
 		lblStats.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStats.setFont(new Font("Tahoma", Font.PLAIN, 21));
-		lblStats.setBounds(115, 11, 74, 34);
+		lblStats.setBounds(158, 11, 74, 34);
 		
 		Stats.add(lblStats);
 		lblPetitions.setFont(new Font("Tahoma", Font.PLAIN, 17));
@@ -53,11 +65,12 @@ public class Stats extends JFrame {
 		Stats.add(lblPetitions);
 		lblNumeric.setHorizontalAlignment(SwingConstants.CENTER);
 		lblNumeric.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		lblNumeric.setBounds(115, 57, 74, 34);
+		lblNumeric.setBounds(129, 61, 74, 34);
 		
 		Stats.add(lblNumeric);
+		lblSizebytes.setHorizontalAlignment(SwingConstants.CENTER);
 		lblSizebytes.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		lblSizebytes.setBounds(222, 57, 95, 34);
+		lblSizebytes.setBounds(222, 61, 136, 34);
 		
 		Stats.add(lblSizebytes);
 		lblHits.setFont(new Font("Tahoma", Font.PLAIN, 17));
@@ -65,48 +78,48 @@ public class Stats extends JFrame {
 		
 		Stats.add(lblHits);
 		lblHitsRatio.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		lblHitsRatio.setBounds(10, 183, 95, 34);
+		lblHitsRatio.setBounds(10, 183, 109, 34);
 		
 		Stats.add(lblHitsRatio);
 		lblPetitions_number.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPetitions_number.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblPetitions_number.setBounds(115, 102, 64, 21);
+		lblPetitions_number.setBounds(139, 102, 64, 21);
 		
 		Stats.add(lblPetitions_number);
 		lblHitsnumber.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHitsnumber.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblHitsnumber.setBounds(115, 147, 74, 21);
+		lblHitsnumber.setBounds(129, 147, 74, 21);
 
 		
 		Stats.add(lblHitsnumber);
 		lblHitsrationumber.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHitsrationumber.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblHitsrationumber.setBounds(115, 192, 74, 21);
+		lblHitsrationumber.setBounds(129, 192, 74, 21);
 		lblHitsnumber.setText(Integer.toString(Cache_Server.hit));
 		
 		Stats.add(lblHitsrationumber);
 		lblPetitionsSize.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPetitionsSize.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblPetitionsSize.setBounds(222, 102, 85, 21);
+		lblPetitionsSize.setBounds(249, 102, 85, 21);
 		
 		Stats.add(lblPetitionsSize);
 		lblHitsSize.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHitsSize.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblHitsSize.setBounds(244, 147, 55, 21);
+		lblHitsSize.setBounds(266, 147, 55, 21);
 		
 		Stats.add(lblHitsSize);
 		lblHitsSizeRatio.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHitsSizeRatio.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblHitsSizeRatio.setBounds(225, 192, 92, 21);
+		lblHitsSizeRatio.setBounds(252, 192, 92, 21);
 		
 		Stats.add(lblHitsSizeRatio);
-		Content.setBounds(337, 11, 232, 306);
+		Content.setBounds(392, 11, 390, 446);
 		
 		getContentPane().add(Content);
 		Content.setLayout(null);
 		lblContents.setHorizontalAlignment(SwingConstants.CENTER);
 		lblContents.setFont(new Font("Tahoma", Font.PLAIN, 21));
-		lblContents.setBounds(52, 11, 124, 43);
+		lblContents.setBounds(138, 11, 124, 43);
 		
 		Content.add(lblContents);
 		
