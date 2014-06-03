@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.net.Socket;
-import java.util.Map;
 
 public class Cache_TransferRequestHandler implements Runnable{
 		
@@ -77,16 +76,17 @@ public class Cache_TransferRequestHandler implements Runnable{
 				int next = Cache_Server.c.usedEntries()+1;
 				Cache_Server.c.put (Integer.toString(next), file);
 			}
-			double porc = (100 * (double) Cache_Server.hit)/(double) Cache_Server.peticiones;
-			double porc_bytes = (100 * (double) Cache_Server.hits_bytes)/(double) Cache_Server.peticiones_bytes;
-			System.out.println("CONTENIDO DE LA CACHE");
+			Cache_Server.porc = (100 * (double) Cache_Server.hit)/(double) Cache_Server.peticiones;
+			Cache_Server.porc_bytes = (100 * (double) Cache_Server.hits_bytes)/(double) Cache_Server.peticiones_bytes;
+			Cache_Server.frame.refresh_stats();
+			/*System.out.println("CONTENIDO DE LA CACHE");
 			for (Map.Entry<String, String> e : Cache_Server.c.getAll())
 			      System.out.println (e.getKey() + " : " + e.getValue());
 			System.out.println("ESTADISTICAS");
 			System.out.println("      PETICIONES    - > "+Cache_Server.peticiones+ "               bytes ->" + Cache_Server.peticiones_bytes);
 			System.out.println("      ACIERTOS      - > "+ Cache_Server.hit + "               bytes ->" + Cache_Server.hits_bytes);
-			System.out.println("      P. ACIERTOS   - > " + porc + " %" + "               bytes ->" + porc_bytes + " %");
-			
+			System.out.println("      P. ACIERTOS   - > " + Cache_Server.porc + " %" + "               bytes ->" + Cache_Server.porc_bytes + " %");
+			*/
 			SendFile(file,dout);
 			return "Procesado";
 		}

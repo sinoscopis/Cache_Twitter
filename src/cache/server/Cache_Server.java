@@ -4,6 +4,7 @@ import java.net.*;
 import java.io.*;
 
 import cache.LRUCache;
+import cache.display.Stats;
 
  
 /**
@@ -11,15 +12,18 @@ import cache.LRUCache;
  */
 public class Cache_Server extends Thread
 { //Arbitrary port number
-	static int peticiones=0;
-	static int hit=0;
-	static int cache_lines;
-	static  LRUCache<String,String> c = new LRUCache<String, String>(100);
-	static long peticiones_bytes=0;
-	static long hits_bytes=0;
+	public static int peticiones=0;
+	public static int hit=0;
+	public static int cache_lines;
+	public static  LRUCache<String,String> c = new LRUCache<String, String>(100);
+	public static long peticiones_bytes=0;
+	public static long hits_bytes=0;
+	public static double porc=0;
+	public static double porc_bytes=0;
 	final static int _transferPort = 60000;
 	private Socket cache_transfersocket = null;
 	private ServerSocket cachetransferSocket = null;
+	public static Stats frame;
 
 	public static void main(String[] args) {
 		
@@ -43,7 +47,9 @@ public class Cache_Server extends Thread
 		
 		try {
 			cachetransferSocket = new ServerSocket(_transferPort);
-		
+			frame = new Stats();
+			frame.start();
+			
 		} catch (IOException e) {
 			System.err.println("Could not listen on port: " + _transferPort);
 			System.exit(-1);
