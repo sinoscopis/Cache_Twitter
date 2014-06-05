@@ -78,16 +78,8 @@ public class Cache_TransferRequestHandler implements Runnable{
 			}
 			Cache_Server.porc = (100 * (double) Cache_Server.hit)/(double) Cache_Server.peticiones;
 			Cache_Server.porc_bytes = (100 * (double) Cache_Server.hits_bytes)/(double) Cache_Server.peticiones_bytes;
-			Cache_Server.frame.refresh_stats();
-			/*System.out.println("CONTENIDO DE LA CACHE");
-			for (Map.Entry<String, String> e : Cache_Server.c.getAll())
-			      System.out.println (e.getKey() + " : " + e.getValue());
-			System.out.println("ESTADISTICAS");
-			System.out.println("      PETICIONES    - > "+Cache_Server.peticiones+ "               bytes ->" + Cache_Server.peticiones_bytes);
-			System.out.println("      ACIERTOS      - > "+ Cache_Server.hit + "               bytes ->" + Cache_Server.hits_bytes);
-			System.out.println("      P. ACIERTOS   - > " + Cache_Server.porc + " %" + "               bytes ->" + Cache_Server.porc_bytes + " %");
-			*/
 			SendFile(file,dout);
+			Cache_Server.frame.refresh_stats();
 			return "Procesado";
 		}
 		
@@ -98,6 +90,7 @@ public class Cache_TransferRequestHandler implements Runnable{
 				file_path = ".\\Cache_Content\\"+file;
 			}
 			else {
+				
 				file_path = "./Cache_Content/"+file;
 			}
 			File f=new File(file_path);
