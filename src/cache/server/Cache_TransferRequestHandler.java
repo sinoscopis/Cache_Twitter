@@ -87,7 +87,8 @@ public class Cache_TransferRequestHandler implements Runnable{
 			String sSistemaOperativo = System.getProperty("os.name");
 			String file_path = null;
 			if(sSistemaOperativo.startsWith("Win")){
-				file_path = ".\\Cache_Content\\"+file;
+				//file_path = ".\\Cache_Content\\"+file;
+				file_path = "C:\\Users\\Alberto\\Desktop\\Cache_Content\\"+file;
 			}
 			else {
 				
@@ -102,7 +103,8 @@ public class Cache_TransferRequestHandler implements Runnable{
 			String sSistemaOperativo = System.getProperty("os.name");
 			String file_path = null;
 			if(sSistemaOperativo.startsWith("Win")){
-				file_path = ".\\Cache_Content\\"+filename;
+				file_path = "C:\\Users\\Alberto\\Desktop\\Cache_Content\\"+filename;
+				//file_path = ".\\Cache_Content\\"+filename;
 			}
 			else {
 				file_path = "./Cache_Content/"+filename;
@@ -157,7 +159,8 @@ public class Cache_TransferRequestHandler implements Runnable{
 			String sSistemaOperativo = System.getProperty("os.name");
 			String file_path = null;
 			if(sSistemaOperativo.startsWith("Win")){
-				file_path = ".\\Cache_Content\\"+filename;
+				file_path = "C:\\Users\\Alberto\\Desktop\\Cache_Content\\"+filename;
+				//file_path = ".\\Cache_Content\\"+filename;
 			}
 			else {
 				file_path = "./Cache_Content/"+filename;
