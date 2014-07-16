@@ -15,11 +15,20 @@ public class Cache_Server extends Thread
 	public static int peticiones=0;
 	public static int hit=0;
 	public static int cache_lines;
-	public static  LRUCache<String,String> c = new LRUCache<String, String>(100);
+	public static int users_by_cache;
 	public static long peticiones_bytes=0;
 	public static long hits_bytes=0;
 	public static double porc=0;
 	public static double porc_bytes=0;
+	public static int next1=0;
+	public static  LRUCache<String,String> c;
+	public static int hit2=0;
+	public static int cache_lines2;
+	public static long hits_bytes2=0;
+	public static double porc2=0;
+	public static double porc_bytes2=0;
+	public static int next2=0;
+	public static  LRUCache<String,String> c2;
 	final static int _transferPort = 60000;
 	private Socket cache_transfersocket = null;
 	private ServerSocket cachetransferSocket = null;
@@ -31,12 +40,13 @@ public class Cache_Server extends Thread
 		    try {
 		    	cache_lines = Integer.parseInt(args[0]);
 		    	Cache_TransferRequestHandler.server_ip = args[1];
+		    	users_by_cache = Integer.parseInt(args[2]);
 		    } catch (Exception e) {
-		        System.err.println("Cache_Server.jar cache_lines Server_IP");
+		        System.err.println("Cache_Server.jar cache_lines Server_IP users_in_cache");
 		    }
 		}
 		else{
-			System.err.println("Cache_Server.jar cache_lines Server_IP");
+			System.err.println("Cache_Server.jar cache_lines Server_IP users_in_cache");
 			System.exit(1);
 		}
 		
@@ -46,6 +56,8 @@ public class Cache_Server extends Thread
 	public void run() {
 		
 		try {
+			c = new LRUCache<String, String>(cache_lines);
+			c2 = new LRUCache<String, String>(cache_lines);
 			cachetransferSocket = new ServerSocket(_transferPort);
 			frame = new Stats();
 			frame.start();

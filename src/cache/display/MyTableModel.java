@@ -5,7 +5,6 @@ import java.util.Map;
 import javax.swing.table.AbstractTableModel;
 
 import cache.LRUCache;
-import cache.server.Cache_Server;
 
 class MyTableModel extends AbstractTableModel {
 
@@ -17,7 +16,7 @@ class MyTableModel extends AbstractTableModel {
 		data = new Object[cache.usedEntries()][1];
 		int i = 0;
 		
-		for (Map.Entry<String, String> e : Cache_Server.c.getAll()) {
+		for (Map.Entry<String, String> e : cache.getAll()) {
 			data[i][0] = e.getValue();
 			i++;
 		}
