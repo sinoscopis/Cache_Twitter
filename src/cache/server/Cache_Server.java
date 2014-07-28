@@ -33,16 +33,18 @@ public class Cache_Server extends Thread
 	private Socket cache_transfersocket = null;
 	private ServerSocket cachetransferSocket = null;
 	public static Stats frame;
+	public static int cache_num;
 
 	public static void main(String[] args) {
 		
 		if (args.length > 0) {
 		    try {
-		    	cache_lines = Integer.parseInt(args[0]);
-		    	Cache_TransferRequestHandler.server_ip = args[1];
-		    	users_by_cache = Integer.parseInt(args[2]);
+		    	cache_num = Integer.parseInt(args[0]);
+		    	cache_lines = Integer.parseInt(args[1]);
+		    	Cache_TransferRequestHandler.server_ip = args[2];
+		    	users_by_cache = Integer.parseInt(args[3]);
 		    } catch (Exception e) {
-		        System.err.println("Cache_Server.jar cache_lines Server_IP users_in_cache");
+		        System.err.println("Cache_Server.jar cache_number cache_lines Server_IP users_in_cache");
 		    }
 		}
 		else{
