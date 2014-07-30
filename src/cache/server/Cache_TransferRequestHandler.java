@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Map;
 
 public class Cache_TransferRequestHandler implements Runnable{
 		
@@ -91,10 +92,72 @@ public class Cache_TransferRequestHandler implements Runnable{
 			SendFile(file,dout);
 			
 			if (del==true){
-				DeleteFile(file);
+				DeleteFile(file,"eCOUSIN");
 			}
 			Cache_Server.frame.refresh_stats();
 			return "Procesado";
+		}
+		
+		private static boolean cache_stats(String file, DataOutputStream dout, int[] petitionFrindsByCache, boolean del) throws Exception {
+			String firstLRU = null;
+			String firstECO = null;
+			if (Cache_Server.c.usedEntries() == Cache_Server.cache_lines){
+				for (Map.Entry<String, String> e : Cache_Server.c.getAll()){
+					   if (firstLRU == null){
+						   firstLRU = e.getValue();
+						   break;
+					   }
+				}
+			}
+			if (Cache_Server.c2.usedEntries() == Cache_Server.cache_lines){
+				for (Map.Entry<String, String> d : Cache_Server.c2.getAll()){
+					   if (firstECO == null){
+						   firstECO = d.getValue();
+						   break;
+					   }
+				}
+			}
+			if (Cache_Server.c.inCache(file)){
+				String key = Cache_Server.c.getval(file);
+				Cache_Server.c.get(key);
+				long peticion_size=Procesarbytes(file,"LRU");
+				Cache_Server.hit++;
+				Cache_Server.hits_bytes=Cache_Server.hits_bytes+peticion_size;
+				Cache_Server.peticiones_bytes=Cache_Server.peticiones_bytes+peticion_size;
+			}
+			else{
+				Coste(file,"LRU",firstLRU);
+				copyFromServer(file,"LRU");
+				long peticion_size=Procesarbytes(file,"LRU");
+				Cache_Server.peticiones_bytes=Cache_Server.peticiones_bytes + peticion_size;
+				
+				Cache_Server.next1=Cache_Server.next1+1;
+				Cache_Server.c.put (Integer.toString(Cache_Server.next1), file);
+				DeleteFile(firstLRU, "LRU");
+				RegistrarFile(file,"LRU");
+			}
+			if (Cache_Server.c2.inCache(file)){
+				String key2 = Cache_Server.c2.getval2(file);
+				Cache_Server.c2.get(key2);
+				long peticion_size=Procesarbytes(file,"eCousin");
+				Cache_Server.hit2++;
+				Cache_Server.hits_bytes2=Cache_Server.hits_bytes2+peticion_size;
+			}
+			else{
+				Coste(file,"eCOUSIN",firstECO);
+				copyFromServer(file,"eCOUSIN");
+				del = true;
+				int umbral =(int) (Cache_Server.users_by_cache*60)/100;
+				
+				if (petitionFrindsByCache[Cache_num-1] > umbral) {
+					Cache_Server.next2=Cache_Server.next2+1;
+					Cache_Server.c2.put (Integer.toString(Cache_Server.next2), file);
+					del = false;
+					DeleteFile(firstECO, "eCOUSIN");
+					RegistrarFile(file,"eCOUSIN");
+				}
+			}
+			return del;
 		}
 		
 		private static void RegistrarFile(String file, String cache_type) {
@@ -147,66 +210,114 @@ public class Cache_TransferRequestHandler implements Runnable{
 			}			
 		}
 
-		private static void DeleteFile(String file) {
+		private static void DeleteFile(String file,String cache_type) {
 			try{
 				String sSistemaOperativo = System.getProperty("os.name");
 				String file_path = null;
-				if(sSistemaOperativo.startsWith("Win")){
-					file_path = "C:\\Users\\Alberto\\Desktop\\Cache_eco_Content\\"+file;
-					//file_path = ".\\Cache_eco_Content\\"+file;
+				if (cache_type == "LRU"){
+					if(sSistemaOperativo.startsWith("Win")){
+						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_Content\\"+file;
+						//file_path = ".\\Cache_Content\\"+file;
+					}
+					else {
+						file_path = "./Cache_Content/"+file;
+					}
+					File f=new File(file_path);
+					if(f.delete()){
+		    			System.out.println(f.getName() + " is deleted!");
+		    		}else{
+		    			System.out.println("Delete operation is failed.");
+		    		}
 				}
 				else {
-					file_path = "./Cache_eco_Content/"+file;
+					if(sSistemaOperativo.startsWith("Win")){
+						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_eco_Content\\"+file;
+						//file_path = ".\\Cache_eco_Content\\"+file;
+					}
+					else {
+						file_path = "./Cache_eco_Content/"+file;
+					}
+					File f=new File(file_path);
+					if(f.delete()){
+		    			System.out.println(f.getName() + " is deleted!");
+		    		}else{
+		    			System.out.println("Delete operation is failed.");
+		    		}
 				}
-				File f=new File(file_path);
-				if(f.delete()){
-	    			System.out.println(f.getName() + " is deleted!");
-	    		}else{
-	    			System.out.println("Delete operation is failed.");
-	    		}
 			}catch (Exception e){
 				e.printStackTrace();
 			}
 		}
 
-		private static boolean cache_stats(String file, DataOutputStream dout, int[] petitionFrindsByCache, boolean del) throws Exception {
-			if (Cache_Server.c.inCache(file)){
-				String key = Cache_Server.c.getval(file);
-				Cache_Server.c.get(key);
-				long peticion_size=Procesarbytes(file,"LRU");
-				Cache_Server.hit++;
-				Cache_Server.hits_bytes=Cache_Server.hits_bytes+peticion_size;
-				Cache_Server.peticiones_bytes=Cache_Server.peticiones_bytes+peticion_size;
-			}
-			else{
-				copyFromServer(file,"LRU");
-				long peticion_size=Procesarbytes(file,"LRU");
-				Cache_Server.peticiones_bytes=Cache_Server.peticiones_bytes + peticion_size;
+		private static int Coste(String file, String cache_type, String first) {
+			Socket socket = null;
+			PrintWriter out = null;
+			BufferedReader in = null;
+			int reply=0;
+			try {
+				socket = new Socket(Cache_TransferRequestHandler.server_ip, 55555);
+	 
+				out = new PrintWriter(socket.getOutputStream(), true);
+				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	 
+				String fromServer;
+				String fromUser = null;
 				
-				Cache_Server.next1=Cache_Server.next1+1;
-				Cache_Server.c.put (Integer.toString(Cache_Server.next1), file);
-				RegistrarFile(file,"LRU");
-			}
-			if (Cache_Server.c2.inCache(file)){
-				String key2 = Cache_Server.c2.getval2(file);
-				Cache_Server.c2.get(key2);
-				long peticion_size=Procesarbytes(file,"eCousin");
-				Cache_Server.hit2++;
-				Cache_Server.hits_bytes2=Cache_Server.hits_bytes2+peticion_size;
-			}
-			else{
-				copyFromServer(file,"eCOUSIN");
-				del = true;
-				int umbral =(int) (Cache_Server.users_by_cache*60)/100;
 				
-				if (petitionFrindsByCache[Cache_num-1] > umbral) {
-					Cache_Server.next2=Cache_Server.next2+1;
-					Cache_Server.c2.put (Integer.toString(Cache_Server.next2), file);
-					del = false;
-					RegistrarFile(file,"eCOUSIN");
+				while ((fromServer = in.readLine()) != null) {
+					//System.out.println("Server - " + fromServer);
+					if (fromServer.equals("exit"))
+						break;
+					else if (fromServer.startsWith("......")){
+						if (first == null){
+							if (cache_type == "LRU")
+								fromUser = "costeLRU," + file + "," + Cache_num;
+							else 
+								fromUser = "costeECO," + file + "," + Cache_num;	
+						}
+						else{
+							if (cache_type == "LRU")
+								fromUser = "costeLRUwithUPD," + file + "," + Cache_num + ","+first;
+							else 
+								fromUser = "costeECOwithUPD," + file + "," + Cache_num + ","+first;	
+						}
+						if (fromUser != null) {
+							//System.out.println("Client - " + fromUser);
+							synchronized (socket){
+								out.println(fromUser);
+							}
+						}
+					}
+					else if (fromServer.startsWith("menorcoste,")){
+						String[] peticion = fromServer.split(",", 2);
+						reply = Integer.parseInt(peticion[1]);
+						
+						fromUser = "exit";	
+						if (fromUser != null) {
+							//System.out.println("Client - " + fromUser);
+							synchronized (socket){
+								out.println(fromUser);
+							}
+						}
+					}
+				}
+			} catch (UnknownHostException e) {
+				System.err.println("Cannot find the host: " + Cache_TransferRequestHandler.server_ip);
+				System.exit(1);
+			} catch (IOException e) {
+				System.out.println("Couldn't read/write from the connection: " +e.toString() );
+				e.printStackTrace();
+				System.exit(1);
+			} finally { //Make sure we always clean up	
+				try {
+					out.close();
+					in.close();
+					socket.close();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
-			return del;
+			return reply;				
 		}
 
 		private static long Procesarbytes(String file, String cache) {
@@ -272,7 +383,7 @@ public class Cache_TransferRequestHandler implements Runnable{
 			}
 		}
 		
-		private static void copyFromServer(String file, String cache) {
+		private static void copyFromServer(String file, String cache) {			
 			Socket ClientSoc = null;
 
 			DataInputStream din;
