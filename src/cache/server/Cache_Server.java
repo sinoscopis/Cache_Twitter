@@ -36,6 +36,7 @@ public class Cache_Server extends Thread
 	private ServerSocket cachetransferSocket = null;
 	public static Stats frame;
 	public static int cache_num;
+	public static int umbral;
 
 	public static void main(String[] args) {
 		
@@ -45,6 +46,7 @@ public class Cache_Server extends Thread
 		    	cache_lines = Integer.parseInt(args[1]);
 		    	Cache_TransferRequestHandler.server_ip = args[2];
 		    	users_by_cache = Integer.parseInt(args[3]);
+		    	umbral = Integer.parseInt(args[4]);
 		    } catch (Exception e) {
 		        System.err.println("Cache_Server.jar cache_number cache_lines Server_IP users_in_cache");
 		    }

@@ -151,7 +151,7 @@ public class Cache_TransferRequestHandler implements Runnable{
 				long peticion_size=Procesarbytes(file,"eCousin");
 				Cache_Server.costeECO = Cache_Server.costeECO + (parcial2 * peticion_size);
 				del = true;
-				int umbral =(int) (Cache_Server.users_by_cache*60)/100;
+				int umbral =(int) (Cache_Server.users_by_cache*Cache_Server.umbral)/100;
 				
 				if (petitionFrindsByCache[Cache_num-1] > umbral) {
 					Cache_Server.next2=Cache_Server.next2+1;
