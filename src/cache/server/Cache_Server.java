@@ -30,6 +30,8 @@ public class Cache_Server extends Thread
 	public static int next2=0;
 	public static  LRUCache<String,String> c2;
 	final static int _transferPort = 60000;
+	public static double costeLRU = 0;
+	public static double costeECO = 0;
 	private Socket cache_transfersocket = null;
 	private ServerSocket cachetransferSocket = null;
 	public static Stats frame;

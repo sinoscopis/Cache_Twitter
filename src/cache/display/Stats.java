@@ -64,6 +64,10 @@ public class Stats extends JFrame {
 	private final JLabel label_16 = new JLabel("0.0");
 	private final JLabel lblCacheSize = new JLabel("Cache Size:");
 	private final JLabel Cache_size = new JLabel("0");
+	private final JLabel lblEcocoste = new JLabel("Coste (\u20AC):");
+	private final JLabel lblCoste = new JLabel("Coste (\u20AC):");
+	private final JLabel Coste = new JLabel("");
+	private final JLabel EcoCoste = new JLabel("");
 	
 	public Stats() {
 		initGUI();
@@ -80,43 +84,43 @@ public class Stats extends JFrame {
 			e.printStackTrace();
 		}
 		setTitle("Cache on "+ host.getHostAddress() +" Stats");*/
-		setTitle("Cache Statistics");
-		Stats.setBounds(7, 110, 382, 155);
+		setTitle("Cache Statistics - "+ Cache_Server.cache_num);
+		Stats.setBounds(7, 95, 382, 170);
 		Stats.setBackground(SystemColor.menu);
 		Stats.setLayout(null);
 		lblStats.setHorizontalAlignment(SwingConstants.CENTER);
 		lblStats.setFont(new Font("Tahoma", Font.PLAIN, 27));
-		lblStats.setBounds(112, 11, 153, 34);
+		lblStats.setBounds(112, 5, 153, 34);
 		
 		Stats.add(lblStats);
 		lblHits.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		lblHits.setBounds(10, 67, 74, 34);
+		lblHits.setBounds(10, 50, 74, 34);
 		
 		Stats.add(lblHits);
 		lblHitsRatio.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		lblHitsRatio.setBounds(10, 112, 133, 34);
+		lblHitsRatio.setBounds(10, 95, 133, 34);
 		
 		Stats.add(lblHitsRatio);
 		lblHitsnumber.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHitsnumber.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblHitsnumber.setBounds(153, 71, 64, 21);
+		lblHitsnumber.setBounds(153, 54, 64, 21);
 
 		
 		Stats.add(lblHitsnumber);
 		lblHitsrationumber.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHitsrationumber.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblHitsrationumber.setBounds(153, 116, 74, 21);
+		lblHitsrationumber.setBounds(153, 99, 74, 21);
 		lblHitsnumber.setText(Integer.toString(Cache_Server.hit));
 		
 		Stats.add(lblHitsrationumber);
 		lblHitsSize.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHitsSize.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblHitsSize.setBounds(280, 71, 64, 21);
+		lblHitsSize.setBounds(280, 54, 64, 21);
 		
 		Stats.add(lblHitsSize);
 		lblHitsSizeRatio.setHorizontalAlignment(SwingConstants.CENTER);
 		lblHitsSizeRatio.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblHitsSizeRatio.setBounds(280, 116, 74, 21);
+		lblHitsSizeRatio.setBounds(280, 99, 74, 21);
 		
 		Stats.add(lblHitsSizeRatio);
 		Cache_content.setBounds(-1, 276, 390, 446);
@@ -205,6 +209,15 @@ public class Stats extends JFrame {
 		label_16.setBounds(280, 211, 74, 21);
 		
 		panel.add(label_16);
+		lblCoste.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		lblCoste.setBounds(64, 136, 90, 34);
+		
+		Stats.add(lblCoste);
+		Coste.setHorizontalAlignment(SwingConstants.CENTER);
+		Coste.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		Coste.setBounds(153, 136, 133, 34);
+		
+		Stats.add(Coste);
 		getContentPane().add(Cache_content);
 		lblStackCount.setBackground(SystemColor.textHighlight);
 		lblStackCount.setFont(new Font("Tahoma", Font.PLAIN, 27));
@@ -213,42 +226,51 @@ public class Stats extends JFrame {
 		Cache_content.add(lblStackCount);
 		eCousin_Stats.setLayout(null);
 		eCousin_Stats.setBackground(SystemColor.activeCaptionBorder);
-		eCousin_Stats.setBounds(399, 110, 382, 155);
+		eCousin_Stats.setBounds(399, 95, 382, 170);
 		
 		getContentPane().add(eCousin_Stats);
 		lblEcousinStats.setHorizontalAlignment(SwingConstants.CENTER);
 		lblEcousinStats.setFont(new Font("Tahoma", Font.PLAIN, 27));
-		lblEcousinStats.setBounds(101, 11, 188, 34);
+		lblEcousinStats.setBounds(102, 0, 188, 34);
 		
 		eCousin_Stats.add(lblEcousinStats);
 		label_4.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		label_4.setBounds(10, 56, 74, 34);
+		label_4.setBounds(10, 45, 74, 34);
 		
 		eCousin_Stats.add(label_4);
 		label_5.setFont(new Font("Tahoma", Font.PLAIN, 17));
-		label_5.setBounds(10, 101, 133, 34);
+		label_5.setBounds(10, 90, 133, 34);
 		
 		eCousin_Stats.add(label_5);
 		ecohitnum.setHorizontalAlignment(SwingConstants.CENTER);
 		ecohitnum.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		ecohitnum.setBounds(153, 60, 64, 21);
+		ecohitnum.setBounds(153, 49, 64, 21);
 		
 		eCousin_Stats.add(ecohitnum);
 		ecoratnum.setHorizontalAlignment(SwingConstants.CENTER);
 		ecoratnum.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		ecoratnum.setBounds(153, 105, 74, 21);
+		ecoratnum.setBounds(153, 94, 74, 21);
 		
 		eCousin_Stats.add(ecoratnum);
 		ecohitsiz.setHorizontalAlignment(SwingConstants.CENTER);
 		ecohitsiz.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		ecohitsiz.setBounds(280, 60, 64, 21);
+		ecohitsiz.setBounds(280, 49, 64, 21);
 		
 		eCousin_Stats.add(ecohitsiz);
 		ecoratsiz.setHorizontalAlignment(SwingConstants.CENTER);
 		ecoratsiz.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		ecoratsiz.setBounds(280, 105, 74, 21);
+		ecoratsiz.setBounds(280, 94, 74, 21);
 		
 		eCousin_Stats.add(ecoratsiz);
+		lblEcocoste.setFont(new Font("Tahoma", Font.PLAIN, 17));
+		lblEcocoste.setBounds(65, 136, 91, 34);
+		
+		eCousin_Stats.add(lblEcocoste);
+		EcoCoste.setHorizontalAlignment(SwingConstants.CENTER);
+		EcoCoste.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		EcoCoste.setBounds(153, 136, 133, 34);
+		
+		eCousin_Stats.add(EcoCoste);
 		eCousin_Cache_content.setLayout(null);
 		eCousin_Cache_content.setBackground(SystemColor.activeCaptionBorder);
 		eCousin_Cache_content.setBounds(399, 276, 390, 446);
@@ -289,12 +311,12 @@ public class Stats extends JFrame {
 		lblPetitionsSize.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPetitionsSize.setFont(new Font("Tahoma", Font.PLAIN, 22));
 		lblCacheSize.setFont(new Font("Tahoma", Font.PLAIN, 22));
-		lblCacheSize.setBounds(217, 65, 138, 34);
+		lblCacheSize.setBounds(217, 56, 138, 34);
 		
 		getContentPane().add(lblCacheSize);
 		Cache_size.setHorizontalAlignment(SwingConstants.CENTER);
 		Cache_size.setFont(new Font("Tahoma", Font.PLAIN, 22));
-		Cache_size.setBounds(365, 72, 64, 21);
+		Cache_size.setBounds(365, 63, 64, 21);
 		
 		getContentPane().add(Cache_size);
 	}
@@ -316,12 +338,14 @@ public class Stats extends JFrame {
 		lblHitsrationumber.setText(Double.toString(Cache_Server.porc));
 		lblHitsSize.setText(Long.toString(Cache_Server.hits_bytes));
 		lblHitsSizeRatio.setText(Double.toString(Cache_Server.porc_bytes));
+		Coste.setText(Double.toString(Cache_Server.costeLRU));
 		
 		ecoStackCount.setText(Integer.toString(Cache_Server.c2.usedEntries()));
 		ecohitnum.setText(Integer.toString(Cache_Server.hit2));
 		ecoratnum.setText(Double.toString(Cache_Server.porc2));
 		ecohitsiz.setText(Long.toString(Cache_Server.hits_bytes2));
 		ecoratsiz.setText(Double.toString(Cache_Server.porc_bytes2));
+		EcoCoste.setText(Double.toString(Cache_Server.costeECO));
 		
 		
 	}
