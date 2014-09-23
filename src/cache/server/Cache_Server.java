@@ -34,6 +34,7 @@ public class Cache_Server extends Thread
 	public static double costeECO = 0;
 	private Socket cache_transfersocket = null;
 	private ServerSocket cachetransferSocket = null;
+	public static double enhance=0;
 	public static Stats frame;
 	public static int cache_num;
 	public static int umbral;
@@ -48,11 +49,11 @@ public class Cache_Server extends Thread
 		    	users_by_cache = Integer.parseInt(args[3]);
 		    	umbral = Integer.parseInt(args[4]);
 		    } catch (Exception e) {
-		        System.err.println("Cache_Server.jar cache_number cache_lines Server_IP users_in_cache");
+		        System.err.println("Cache_Server.jar cache_number cache_lines Server_IP users_in_cache cache_umbral");
 		    }
 		}
 		else{
-			System.err.println("Cache_Server.jar cache_lines Server_IP users_in_cache");
+			System.err.println("Cache_Server.jar cache_number cache_lines Server_IP users_in_cache cache_umbral");
 			System.exit(1);
 		}
 		

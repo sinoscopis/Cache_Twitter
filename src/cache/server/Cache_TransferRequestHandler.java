@@ -72,23 +72,26 @@ public class Cache_TransferRequestHandler implements Runnable{
 			String[] args = peticion.split("/", 3);
 			Cache_num=Integer.parseInt(args[0]);
 			String file = args[1];
+			int num_followers_cache = Integer.parseInt(args[2]);
 			boolean del = false;
-			int[] petitionFrindsByCache = new int [5];
+			/*int[] petitionFrindsByCache = new int [5];
 			String[] caches = args[2].split(",");
 			petitionFrindsByCache[0]=Integer.parseInt(caches[1]);
 			petitionFrindsByCache[1]=Integer.parseInt(caches[3]);
 			petitionFrindsByCache[2]=Integer.parseInt(caches[5]);
 			petitionFrindsByCache[3]=Integer.parseInt(caches[7]);
-			petitionFrindsByCache[4]=Integer.parseInt(caches[9]);
+			petitionFrindsByCache[4]=Integer.parseInt(caches[9]);*/
 			
 			Cache_Server.peticiones ++;
-			del = cache_stats(file,dout,petitionFrindsByCache,del);
+			del = cache_stats(file,dout,num_followers_cache,del);
 			
 			Cache_Server.porc = (100 * (double) Cache_Server.hit)/(double) Cache_Server.peticiones;
 			Cache_Server.porc_bytes = (100 * (double) Cache_Server.hits_bytes)/(double) Cache_Server.peticiones_bytes;
 			
 			Cache_Server.porc2 = (100 * (double) Cache_Server.hit2)/(double) Cache_Server.peticiones;
 			Cache_Server.porc_bytes2 = (100 * (double) Cache_Server.hits_bytes2)/(double) Cache_Server.peticiones_bytes;
+			if (Cache_Server.porc !=0)
+				Cache_Server.enhance=((Cache_Server.porc2-Cache_Server.porc)*100)/Cache_Server.porc;
 			SendFile(file,dout);
 			
 			if (del==true){
@@ -98,7 +101,7 @@ public class Cache_TransferRequestHandler implements Runnable{
 			return "Procesado";
 		}
 		
-		private static boolean cache_stats(String file, DataOutputStream dout, int[] petitionFrindsByCache, boolean del) throws Exception {
+		private static boolean cache_stats(String file, DataOutputStream dout, int num_followers_cache, boolean del) throws Exception {
 			String firstLRU = null;
 			String firstECO = null;
 			if (Cache_Server.c.usedEntries() == Cache_Server.cache_lines){
@@ -108,7 +111,42 @@ public class Cache_TransferRequestHandler implements Runnable{
 					   break;
 				   }
 				}
+				
+				if (Cache_Server.c.inCache(file)){
+					String key = Cache_Server.c.getval(file);
+					Cache_Server.c.get(key);
+					long peticion_size=Procesarbytes(file,"LRU");
+					Cache_Server.hit++;
+					Cache_Server.hits_bytes=Cache_Server.hits_bytes+peticion_size;
+					Cache_Server.peticiones_bytes=Cache_Server.peticiones_bytes+peticion_size;
+				}
+				else{
+					int parcial = Coste(file,"LRU",firstLRU);
+					copyFromServer(file,"LRU");
+					long peticion_size=Procesarbytes(file,"LRU");
+					Cache_Server.peticiones_bytes=Cache_Server.peticiones_bytes + peticion_size;
+					Cache_Server.costeLRU = Cache_Server.costeLRU + (parcial * peticion_size);
+					
+					Cache_Server.next1=Cache_Server.next1+1;
+					Cache_Server.c.put (Integer.toString(Cache_Server.next1), file);
+					if (firstLRU != null)
+						DeleteFile(firstLRU, "LRU");
+					RegistrarFile(file,"LRU");
+				}
 			}
+			else {
+				if (Cache_Server.c.inCache(file)){
+					String key = Cache_Server.c.getval(file);
+					Cache_Server.c.get(key);
+				}
+				else{
+					copyFromServer(file,"LRU");
+					Cache_Server.next1=Cache_Server.next1+1;
+					Cache_Server.c.put (Integer.toString(Cache_Server.next1), file);
+					RegistrarFile(file,"LRU");
+				}
+			}
+			
 			if (Cache_Server.c2.usedEntries() == Cache_Server.cache_lines){
 				for (Map.Entry<String, String> d : Cache_Server.c2.getAll()){
 				   if (firstECO == null){
@@ -116,49 +154,41 @@ public class Cache_TransferRequestHandler implements Runnable{
 					   break;
 				   }
 				}
-			}
-			if (Cache_Server.c.inCache(file)){
-				String key = Cache_Server.c.getval(file);
-				Cache_Server.c.get(key);
-				long peticion_size=Procesarbytes(file,"LRU");
-				Cache_Server.hit++;
-				Cache_Server.hits_bytes=Cache_Server.hits_bytes+peticion_size;
-				Cache_Server.peticiones_bytes=Cache_Server.peticiones_bytes+peticion_size;
-			}
-			else{
-				int parcial = Coste(file,"LRU",firstLRU);
-				copyFromServer(file,"LRU");
-				long peticion_size=Procesarbytes(file,"LRU");
-				Cache_Server.peticiones_bytes=Cache_Server.peticiones_bytes + peticion_size;
-				Cache_Server.costeLRU = Cache_Server.costeLRU + (parcial * peticion_size);
 				
-				Cache_Server.next1=Cache_Server.next1+1;
-				Cache_Server.c.put (Integer.toString(Cache_Server.next1), file);
-				if (firstLRU != null)
-					DeleteFile(firstLRU, "LRU");
-				RegistrarFile(file,"LRU");
+				if (Cache_Server.c2.inCache(file)){
+					String key2 = Cache_Server.c2.getval2(file);
+					Cache_Server.c2.get(key2);
+					long peticion_size=Procesarbytes(file,"eCousin");
+					Cache_Server.hit2++;
+					Cache_Server.hits_bytes2=Cache_Server.hits_bytes2+peticion_size;
+				}
+				else{
+					int parcial2 = Coste(file,"eCOUSIN",firstECO);
+					copyFromServer(file,"eCOUSIN");
+					long peticion_size=Procesarbytes(file,"eCousin");
+					Cache_Server.costeECO = Cache_Server.costeECO + (parcial2 * peticion_size);
+					del = true;
+					int umbral =(int) (Cache_Server.users_by_cache*Cache_Server.umbral)/100;
+					
+					if (num_followers_cache > umbral) {
+						Cache_Server.next2=Cache_Server.next2+1;
+						Cache_Server.c2.put (Integer.toString(Cache_Server.next2), file);
+						del = false;
+						if (firstECO != null)
+							DeleteFile(firstECO, "eCOUSIN");
+						RegistrarFile(file,"eCOUSIN");
+					}
+				}
 			}
-			if (Cache_Server.c2.inCache(file)){
-				String key2 = Cache_Server.c2.getval2(file);
-				Cache_Server.c2.get(key2);
-				long peticion_size=Procesarbytes(file,"eCousin");
-				Cache_Server.hit2++;
-				Cache_Server.hits_bytes2=Cache_Server.hits_bytes2+peticion_size;
-			}
-			else{
-				int parcial2 = Coste(file,"eCOUSIN",firstECO);
-				copyFromServer(file,"eCOUSIN");
-				long peticion_size=Procesarbytes(file,"eCousin");
-				Cache_Server.costeECO = Cache_Server.costeECO + (parcial2 * peticion_size);
-				del = true;
-				int umbral =(int) (Cache_Server.users_by_cache*Cache_Server.umbral)/100;
-				
-				if (petitionFrindsByCache[Cache_num-1] > umbral) {
+			else {
+				if (Cache_Server.c2.inCache(file)){
+					String key2 = Cache_Server.c2.getval2(file);
+					Cache_Server.c2.get(key2);
+				}
+				else{
+					copyFromServer(file,"eCOUSIN");
 					Cache_Server.next2=Cache_Server.next2+1;
 					Cache_Server.c2.put (Integer.toString(Cache_Server.next2), file);
-					del = false;
-					if (firstECO != null)
-						DeleteFile(firstECO, "eCOUSIN");
 					RegistrarFile(file,"eCOUSIN");
 				}
 			}
@@ -397,7 +427,7 @@ public class Cache_TransferRequestHandler implements Runnable{
 			try{
 			
 				//InetAddress host = InetAddress.getLocalHost();
-				ClientSoc = new Socket(server_ip, 55055);
+				ClientSoc = new Socket(server_ip, 44444);
 				
 				din=new DataInputStream(ClientSoc.getInputStream());
 				dout=new DataOutputStream(ClientSoc.getOutputStream());
