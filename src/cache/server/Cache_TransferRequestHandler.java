@@ -1,3 +1,12 @@
+/*
+ * Realiza toda la gestion de los algoritmos de eCousin
+ * 
+ * SearchinCache(): Busca si tiene el contenido en la cache almacenado
+ * 
+ * cache_stats(): Realiza las modificaciones en las entradas de las caches, y calcula las estadisticas
+ * 
+ */
+
 package cache.server;
 
 import java.io.BufferedReader;
@@ -39,11 +48,19 @@ public class Cache_TransferRequestHandler implements Runnable{
 					try
 					{
 					System.out.println("Waiting for Command Cache...");
+					dout.writeUTF("......");
 					String Command=din.readUTF();
 					if(Command.compareTo("GET")==0)
 					{
 						System.out.println("\tGET Command Received ...");
 						SearchinCache(din,dout);
+						break;
+					}
+					else if(Command.startsWith("Push,"))
+					{
+						System.out.println("\tPush Command Received ...");
+						Push(Command);
+						dout.writeUTF("exit");
 						break;
 					}
 					else if(Command.compareTo("DISCONNECT")==0)
@@ -67,6 +84,92 @@ public class Cache_TransferRequestHandler implements Runnable{
 			}		
 		}
  
+		private void Push(String command) {
+			String[] args = command.split(",", 3);
+			String file_url = args[1];
+			String push = args[2];
+			String file = file_url.substring(17);
+			
+			MeterEnCache3(file,"LRU_PUSH");
+			if (push.compareTo("true")==0){
+				MeterEnCache4(file,"eCO_PUSH");
+			}
+			Cache_Server.frame.refresh_stats_push();
+		}
+
+		private void MeterEnCache3(String file, String cache) {
+			String firstLRU = null;
+			if (Cache_Server.c3.usedEntries() == Cache_Server.cache_lines){
+				for (Map.Entry<String, String> e : Cache_Server.c3.getAll()){
+				   if (firstLRU == null){
+					   firstLRU = e.getValue();
+					   break;
+				   }
+				}
+				if (Cache_Server.c3.inCache(file)){
+					String key = Cache_Server.c3.getval3(file);
+					Cache_Server.c3.get(key);
+				}
+				else{
+					copyFromServer(file,cache);
+					Cache_Server.next3=Cache_Server.next3+1;
+					Cache_Server.c3.put (Integer.toString(Cache_Server.next3), file);
+					if (firstLRU != null)
+						DeleteFile(firstLRU, cache);
+					RegistrarFile(file,cache);
+				}
+			}
+			else {
+				if (Cache_Server.c3.inCache(file)){
+					String key = Cache_Server.c3.getval3(file);
+					Cache_Server.c3.get(key);
+				}
+				else{
+					copyFromServer(file,cache);
+					Cache_Server.next3=Cache_Server.next3+1;
+					Cache_Server.c3.put (Integer.toString(Cache_Server.next3), file);
+					RegistrarFile(file,cache);
+				}
+			}
+		}
+		
+		private void MeterEnCache4(String file, String cache) {
+			String firstLRU = null;
+			if (Cache_Server.c4.usedEntries() == Cache_Server.cache_lines){
+				for (Map.Entry<String, String> e : Cache_Server.c4.getAll()){
+				   if (firstLRU == null){
+					   firstLRU = e.getValue();
+					   break;
+				   }
+				}
+				if (Cache_Server.c4.inCache(file)){
+					String key = Cache_Server.c4.getval4(file);
+					Cache_Server.c4.get(key);
+				}
+				else{
+					copyFromServer(file,cache);
+					Cache_Server.next4=Cache_Server.next4+1;
+					Cache_Server.c4.put (Integer.toString(Cache_Server.next4), file);
+					if (firstLRU != null)
+						DeleteFile(firstLRU, cache);
+					RegistrarFile(file,cache);
+				}
+			}
+			else {
+				if (Cache_Server.c4.inCache(file)){
+					String key = Cache_Server.c4.getval4(file);
+					Cache_Server.c4.get(key);
+				}
+				else{
+					copyFromServer(file,cache);
+					Cache_Server.next4=Cache_Server.next4+1;
+					Cache_Server.c4.put (Integer.toString(Cache_Server.next4), file);
+					RegistrarFile(file,cache);
+				}
+			}
+			
+		}
+
 		public static String SearchinCache(DataInputStream din, DataOutputStream dout) throws Exception{
 			String peticion=din.readUTF();
 			String[] args = peticion.split("/", 3);
@@ -74,16 +177,11 @@ public class Cache_TransferRequestHandler implements Runnable{
 			String file = args[1];
 			int num_followers_cache = Integer.parseInt(args[2]);
 			boolean del = false;
-			/*int[] petitionFrindsByCache = new int [5];
-			String[] caches = args[2].split(",");
-			petitionFrindsByCache[0]=Integer.parseInt(caches[1]);
-			petitionFrindsByCache[1]=Integer.parseInt(caches[3]);
-			petitionFrindsByCache[2]=Integer.parseInt(caches[5]);
-			petitionFrindsByCache[3]=Integer.parseInt(caches[7]);
-			petitionFrindsByCache[4]=Integer.parseInt(caches[9]);*/
+			boolean del2 = false;
 			
 			Cache_Server.peticiones ++;
 			del = cache_stats(file,dout,num_followers_cache,del);
+			del2 = cache_stats2(file,dout,num_followers_cache,del2);
 			
 			Cache_Server.porc = (100 * (double) Cache_Server.hit)/(double) Cache_Server.peticiones;
 			Cache_Server.porc_bytes = (100 * (double) Cache_Server.hits_bytes)/(double) Cache_Server.peticiones_bytes;
@@ -97,6 +195,20 @@ public class Cache_TransferRequestHandler implements Runnable{
 			if (del==true){
 				DeleteFile(file,"eCOUSIN");
 			}
+			
+			Cache_Server.porc3 = (100 * (double) Cache_Server.hit3)/(double) Cache_Server.peticiones;
+			Cache_Server.porc_bytes3 = (100 * (double) Cache_Server.hits_bytes3)/(double) Cache_Server.peticiones_bytes;
+			
+			Cache_Server.porc4 = (100 * (double) Cache_Server.hit4)/(double) Cache_Server.peticiones;
+			Cache_Server.porc_bytes4 = (100 * (double) Cache_Server.hits_bytes4)/(double) Cache_Server.peticiones_bytes;
+			if (Cache_Server.porc3 !=0)
+				Cache_Server.enhance2=((Cache_Server.porc4-Cache_Server.porc3)*100)/Cache_Server.porc3;
+			SendFile(file,dout);
+			
+			if (del==true){
+				DeleteFile(file,"eCO_PUSH");
+			}
+			
 			Cache_Server.frame.refresh_stats();
 			return "Procesado";
 		}
@@ -195,6 +307,98 @@ public class Cache_TransferRequestHandler implements Runnable{
 			return del;
 		}
 		
+		private static boolean cache_stats2(String file, DataOutputStream dout, int num_followers_cache, boolean del2) throws Exception {
+			String firstLRU = null;
+			String firstECO = null;
+			if (Cache_Server.c3.usedEntries() == Cache_Server.cache_lines){
+				for (Map.Entry<String, String> e : Cache_Server.c3.getAll()){
+				   if (firstLRU == null){
+					   firstLRU = e.getValue();
+					   break;
+				   }
+				}
+				
+				if (Cache_Server.c3.inCache(file)){
+					String key = Cache_Server.c3.getval3(file);
+					Cache_Server.c3.get(key);
+					long peticion_size=Procesarbytes(file,"LRU_PUSH");
+					Cache_Server.hit3++;
+					Cache_Server.hits_bytes3=Cache_Server.hits_bytes3+peticion_size;
+				}
+				else{
+					int parcial = Coste(file,"LRU_PUSH",firstLRU);
+					copyFromServer(file,"LRU_PUSH");
+					long peticion_size=Procesarbytes(file,"LRU_PUSH");
+					Cache_Server.costeLRU_PUSH = Cache_Server.costeLRU_PUSH + (parcial * peticion_size);
+					
+					Cache_Server.next3=Cache_Server.next3+1;
+					Cache_Server.c3.put (Integer.toString(Cache_Server.next3), file);
+					if (firstLRU != null)
+						DeleteFile(firstLRU, "LRU_PUSH");
+					RegistrarFile(file,"LRU_PUSH");
+				}
+			}
+			else {
+				if (Cache_Server.c3.inCache(file)){
+					String key = Cache_Server.c3.getval3(file);
+					Cache_Server.c3.get(key);
+				}
+				else{
+					copyFromServer(file,"LRU_PUSH");
+					Cache_Server.next3=Cache_Server.next3+1;
+					Cache_Server.c3.put (Integer.toString(Cache_Server.next3), file);
+					RegistrarFile(file,"LRU_PUSH");
+				}
+			}
+			
+			if (Cache_Server.c4.usedEntries() == Cache_Server.cache_lines){
+				for (Map.Entry<String, String> d : Cache_Server.c4.getAll()){
+				   if (firstECO == null){
+					   firstECO = d.getValue();
+					   break;
+				   }
+				}
+				
+				if (Cache_Server.c4.inCache(file)){
+					String key2 = Cache_Server.c4.getval4(file);
+					Cache_Server.c4.get(key2);
+					long peticion_size=Procesarbytes(file,"eCO_PUSH");
+					Cache_Server.hit4++;
+					Cache_Server.hits_bytes4=Cache_Server.hits_bytes4+peticion_size;
+				}
+				else{
+					int parcial2 = Coste(file,"eCO_PUSH",firstECO);
+					copyFromServer(file,"eCO_PUSH");
+					long peticion_size=Procesarbytes(file,"eCO_PUSH");
+					Cache_Server.costeECO_PUSH = Cache_Server.costeECO_PUSH + (parcial2 * peticion_size);
+					del2 = true;
+					int umbral =(int) (Cache_Server.users_by_cache*Cache_Server.umbral)/100;
+					
+					if (num_followers_cache > umbral) {
+						Cache_Server.next4=Cache_Server.next4+1;
+						Cache_Server.c4.put (Integer.toString(Cache_Server.next4), file);
+						del2 = false;
+						if (firstECO != null)
+							DeleteFile(firstECO, "eCO_PUSH");
+						RegistrarFile(file,"eCO_PUSH");
+					}
+				}
+			}
+			else {
+				if (Cache_Server.c4.inCache(file)){
+					String key2 = Cache_Server.c4.getval4(file);
+					Cache_Server.c4.get(key2);
+				}
+				else{
+					copyFromServer(file,"eCO_PUSH");
+					Cache_Server.next4=Cache_Server.next4+1;
+					Cache_Server.c4.put (Integer.toString(Cache_Server.next4), file);
+					RegistrarFile(file,"eCO_PUSH");
+				}
+			}
+			return del2;
+		}
+		
 		private static void RegistrarFile(String file, String cache_type) {
 			Socket socket = null;
 			PrintWriter out = null;
@@ -216,8 +420,12 @@ public class Cache_TransferRequestHandler implements Runnable{
 					else if (fromServer.startsWith("......")){						
 						if (cache_type == "LRU")
 							fromUser = "fileInLRUCache," + file+","+ Cache_Server.cache_num;
-						else 
-							fromUser = "fileInECOCache," + file+","+ Cache_Server.cache_num;						
+						else if (cache_type == "eCOUSIN")
+							fromUser = "fileInECOCache," + file+","+ Cache_Server.cache_num;
+						else if (cache_type == "LRU_PUSH")
+							fromUser = "fileInPushLRUCache," + file+","+ Cache_Server.cache_num;
+						else if (cache_type == "eCO_PUSH")
+							fromUser = "fileInPushECOCache," + file+","+ Cache_Server.cache_num;
 							
 						if (fromUser != null) {
 							//System.out.println("Client - " + fromUser);
@@ -264,13 +472,43 @@ public class Cache_TransferRequestHandler implements Runnable{
 		    			System.out.println("Delete operation is failed.");
 		    		}
 				}
-				else {
+				else if (cache_type == "eCOUSIN"){
 					if(sSistemaOperativo.startsWith("Win")){
 						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_eco_Content\\"+file;
 						//file_path = ".\\Cache_eco_Content\\"+file;
 					}
 					else {
 						file_path = "./Cache_eco_Content/"+file;
+					}
+					File f=new File(file_path);
+					if(f.delete()){
+		    			System.out.println(f.getName() + " is deleted!");
+		    		}else{
+		    			System.out.println("Delete operation is failed.");
+		    		}
+				}
+				else if (cache_type == "LRU_PUSH"){
+					if(sSistemaOperativo.startsWith("Win")){
+						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_push_Content\\"+file;
+						//file_path = ".\\Cache_push_Content\\"+file;
+					}
+					else {
+						file_path = "./Cache_push_Content/"+file;
+					}
+					File f=new File(file_path);
+					if(f.delete()){
+		    			System.out.println(f.getName() + " is deleted!");
+		    		}else{
+		    			System.out.println("Delete operation is failed.");
+		    		}
+				}
+				else if (cache_type == "eCO_PUSH"){
+					if(sSistemaOperativo.startsWith("Win")){
+						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_push_eco_Content\\"+file;
+						//file_path = ".\\Cache_push_eco_Content\\"+file;
+					}
+					else {
+						file_path = "./Cache_push_eco_Content/"+file;
 					}
 					File f=new File(file_path);
 					if(f.delete()){
@@ -420,7 +658,8 @@ public class Cache_TransferRequestHandler implements Runnable{
 		
 		private static void copyFromServer(String file, String cache) {			
 			Socket ClientSoc = null;
-
+			String sSistemaOperativo = System.getProperty("os.name");
+			String file_path = null;
 			DataInputStream din;
 			DataOutputStream dout;
 			//BufferedReader br;
@@ -434,27 +673,53 @@ public class Cache_TransferRequestHandler implements Runnable{
 				//br=new BufferedReader(new InputStreamReader(System.in));
 				
 				dout.writeUTF("GET");
-				if (cache == "LRU")
-					ReceiveFile(din,dout,file);
-				else 
-					ReceiveFile2(din,dout,file);
+				
+				if (cache == "LRU"){
+					if(sSistemaOperativo.startsWith("Win")){
+						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_Content\\"+file;
+						//file_path = ".\\Cache_Content\\"+filename;
+					}
+					else {
+						file_path = "./Cache_Content/"+file;
+					}
+				}
+				else if (cache == "eCOUSIN"){
+					if(sSistemaOperativo.startsWith("Win")){
+						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_eco_Content\\"+file;
+						//file_path = ".\\Cache_eco_Content\\"+filename;
+					}
+					else {
+						file_path = "./Cache_eco_Content/"+file;
+					}
+				}
+				else if (cache == "LRU_PUSH"){
+					if(sSistemaOperativo.startsWith("Win")){
+						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_push_Content\\"+file;
+						//file_path = ".\\Cache_push_Content\\"+filename;
+					}
+					else {
+						file_path = "./Cache_push_Content/"+file;
+					}
+				}
+				else if (cache == "eCO_PUSH"){
+					if(sSistemaOperativo.startsWith("Win")){
+						file_path = "C:\\Users\\Alberto\\Desktop\\Cache_push_eco_Content\\"+file;
+						//file_path = ".\\Cache_push_eco_Content\\"+filename;
+					}
+					else {
+						file_path = "./Cache_push_eco_Content/"+file;
+					}
+				}	
+				ReceiveFile(din,dout,file,file_path);
 			}
 			catch(Exception e){
 				e.printStackTrace();
 			}
 		}
 		
-		public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String filename) throws Exception
+		public static void ReceiveFile(DataInputStream din, DataOutputStream dout, String filename,String file_path) throws Exception
 		{
-			String sSistemaOperativo = System.getProperty("os.name");
-			String file_path = null;
-			if(sSistemaOperativo.startsWith("Win")){
-				file_path = "C:\\Users\\Alberto\\Desktop\\Cache_Content\\"+filename;
-				//file_path = ".\\Cache_Content\\"+filename;
-			}
-			else {
-				file_path = "./Cache_Content/"+filename;
-			}
+			
 			dout.writeUTF(filename);
 			String msgFromServer=din.readUTF();
 			
@@ -488,50 +753,4 @@ public class Cache_TransferRequestHandler implements Runnable{
 				System.out.println(din.readUTF());	
 			}
 		}
-		
-		public static void ReceiveFile2(DataInputStream din, DataOutputStream dout, String filename) throws Exception
-		{
-			String sSistemaOperativo = System.getProperty("os.name");
-			String file_path = null;
-			if(sSistemaOperativo.startsWith("Win")){
-				file_path = "C:\\Users\\Alberto\\Desktop\\Cache_eco_Content\\"+filename;
-				//file_path = ".\\Cache_eco_Content\\"+filename;
-			}
-			else {
-				file_path = "./Cache_eco_Content/"+filename;
-			}
-			dout.writeUTF(filename);
-			String msgFromServer=din.readUTF();
-			
-			if(msgFromServer.compareTo("File Not Found")==0)
-			{
-				System.out.println("File not found on Server ...");
-				return;
-			}
-			else if(msgFromServer.compareTo("READY")==0)
-			{
-				System.out.println("Receiving File ...");
-				File f=new File(file_path);
-				if(f.exists())
-				{
-					dout.flush();
-					return;					
-				}
-				FileOutputStream fout=new FileOutputStream(f);
-				int ch;
-				String temp;
-				do
-				{
-					temp=din.readUTF();
-					ch=Integer.parseInt(temp);
-					if(ch!=-1)
-					{
-						fout.write(ch);					
-					}
-				}while(ch!=-1);
-				fout.close();
-				System.out.println(din.readUTF());	
-			}
-		}
-		
 	}

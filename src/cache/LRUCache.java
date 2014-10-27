@@ -1,3 +1,9 @@
+/*
+ * Clase de cache LRU
+ * 
+ * En la creación de la cache LRU, el booleano true = LRU, false = FIFO
+ */
+
 package cache;
 
 import java.util.LinkedHashMap;
@@ -26,10 +32,10 @@ private int                  cacheSize;
 * Creates a new LRU cache.
 * @param cacheSize the maximum number of entries that will be kept in this cache.
 */
-public LRUCache (int cacheSize) {
+public LRUCache (int cacheSize, boolean LRU) {
    this.cacheSize = cacheSize;
    int hashTableCapacity = (int)Math.ceil(cacheSize / hashTableLoadFactor) + 1; 
-   map = new LinkedHashMap<K,V>(hashTableCapacity, hashTableLoadFactor, true) {//if true LRU, else FIFO
+   map = new LinkedHashMap<K,V>(hashTableCapacity, hashTableLoadFactor, LRU) {//if true LRU, else FIFO
       // (an anonymous inner class)
       private static final long serialVersionUID = 1;
       @Override protected boolean removeEldestEntry (Map.Entry<K,V> eldest) {
@@ -67,6 +73,26 @@ public synchronized String getval (String value) {
 
 public synchronized String getval2 (String value) {
 	for (Entry<String, String> e : Cache_Server.c2.getAll()){
+		   String name = e.getValue();
+		   if (name.equals(value)){
+			   return e.getKey();
+		   }
+	}
+	return null;
+}
+
+public synchronized String getval3 (String value) {
+	for (Entry<String, String> e : Cache_Server.c3.getAll()){
+		   String name = e.getValue();
+		   if (name.equals(value)){
+			   return e.getKey();
+		   }
+	}
+	return null;
+}
+
+public synchronized String getval4 (String value) {
+	for (Entry<String, String> e : Cache_Server.c4.getAll()){
 		   String name = e.getValue();
 		   if (name.equals(value)){
 			   return e.getKey();

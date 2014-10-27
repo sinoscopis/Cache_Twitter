@@ -1,9 +1,10 @@
+/*
+ * Clase tabla para usarla en el ventana de estadisticas
+ */
 package cache.display;
 
 import java.util.Map;
-
 import javax.swing.table.AbstractTableModel;
-
 import cache.LRUCache;
 
 class MyTableModel extends AbstractTableModel {
