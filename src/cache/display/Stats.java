@@ -25,7 +25,6 @@ import javax.swing.JTable;
 
 import java.awt.Color;
 import java.awt.SystemColor;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 
@@ -139,7 +138,7 @@ public class Stats extends JFrame {
 		getContentPane().setBackground(SystemColor.menu);
 		setSize(1230, 750);
 		setVisible(true);
-		setTitle("Cache "+ Cache_Server.cache_type +" number " +Cache_Server.cache_num + " on "+ InetAddress.getLocalHost().getHostAddress() +" Stats");
+		setTitle("Cache "+ Cache_Server.cache_type +" number " +Cache_Server.cache_num + " on "+ Cache_Server.address +" Stats");
 		if(Cache_Server.cache_type.startsWith("fifo")){
 			cache_typelbl.setText("FIFO");
 			cache_typelbl2.setText("FIFO");
@@ -382,7 +381,7 @@ public class Stats extends JFrame {
 		enhance_lbl.setForeground(SystemColor.desktop);
 		enhance_lbl.setHorizontalAlignment(SwingConstants.CENTER);
 		enhance_lbl.setFont(new Font("Tahoma", Font.PLAIN, 22));
-		enhance_lbl.setBounds(479, 63, 64, 21);
+		enhance_lbl.setBounds(470, 63, 73, 21);
 		
 		getContentPane().add(enhance_lbl);
 		label_1.setFont(new Font("Tahoma", Font.PLAIN, 18));
@@ -391,7 +390,7 @@ public class Stats extends JFrame {
 		getContentPane().add(label_1);
 		label_5.setForeground(SystemColor.desktop);
 		label_5.setFont(new Font("Tahoma", Font.PLAIN, 22));
-		label_5.setBounds(550, 63, 36, 21);
+		label_5.setBounds(557, 63, 36, 21);
 		
 		getContentPane().add(label_5);
 		panel_1.setLayout(null);

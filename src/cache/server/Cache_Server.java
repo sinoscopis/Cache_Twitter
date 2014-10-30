@@ -23,6 +23,9 @@ import cache.display.Stats;
  */
 public class Cache_Server extends Thread
 { //Arbitrary port number
+	
+	public static String address=null;
+	
 	public static int peticiones=0;
 	public static int hit=0;
 	public static int cache_lines;
@@ -80,15 +83,16 @@ public class Cache_Server extends Thread
 		    	cache_num = Integer.parseInt(args[0]);
 		    	cache_lines = Integer.parseInt(args[1]);
 		    	Cache_TransferRequestHandler.server_ip = args[2];
-		    	users_by_cache = Integer.parseInt(args[3]);
-		    	umbral = Integer.parseInt(args[4]);
-		    	cache_type = args[5];
+		    	address = args[3];
+		    	users_by_cache = Integer.parseInt(args[4]);
+		    	umbral = Integer.parseInt(args[5]);
+		    	cache_type = args[6];
 		    } catch (Exception e) {
-		        System.err.println("Cache_Server.jar cache_number cache_lines Server_IP users_in_cache cache_umbral cache_type");
+		        System.err.println("Cache_Server.jar cache_number cache_lines Server_IP cache_IP users_in_cache cache_umbral cache_type");
 		    }
 		}
 		else{
-			System.err.println("Cache_Server.jar cache_number cache_lines Server_IP users_in_cache cache_umbral cache_type");
+			System.err.println("Cache_Server.jar cache_number cache_lines Server_IP cache_IP users_in_cache cache_umbral cache_type");
 			System.exit(1);
 		}
 		
@@ -121,7 +125,8 @@ public class Cache_Server extends Thread
 				if (fromServer.equals("exit"))
 					break;
 				if (fromServer.startsWith("......")){
-					fromCache = "New_Cache," + cache_num + "," + InetAddress.getLocalHost().getHostAddress() +","+ users_by_cache;
+
+					fromCache = "New_Cache," + cache_num + "," + address +","+ users_by_cache;
 					if (fromCache != null) {
 						//System.out.println("Client - " + fromUser);
 						synchronized (socket){
