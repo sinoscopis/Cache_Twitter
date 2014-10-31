@@ -545,14 +545,22 @@ public class Cache_TransferRequestHandler implements Runnable{
 						if (first == null){
 							if (cache_type == "LRU")
 								fromUser = "costeLRU," + file + "," + Cache_num;
-							else 
-								fromUser = "costeECO," + file + "," + Cache_num;	
+							else if (cache_type == "eCOUSIN")
+								fromUser = "costeECO," + file + "," + Cache_num;
+							else if (cache_type == "LRU_PUSH") 
+								fromUser = "costeLRU_PUSH," + file + "," + Cache_num;
+							else if (cache_type == "eCO_PUSH") 
+								fromUser = "costeECO_PUSH," + file + "," + Cache_num;
 						}
 						else{
 							if (cache_type == "LRU")
 								fromUser = "costeLRUwithUPD," + file + "," + Cache_num + ","+first;
-							else 
-								fromUser = "costeECOwithUPD," + file + "," + Cache_num + ","+first;	
+							else if (cache_type == "eCOUSIN") 
+								fromUser = "costeECOwithUPD," + file + "," + Cache_num + ","+first;
+							else if (cache_type == "LRU_PUSH") 
+								fromUser = "costeLRU_PUSHwithUPD," + file + "," + Cache_num + ","+first;
+							else if (cache_type == "eCO_PUSH") 
+								fromUser = "costeECO_PUSHwithUPD," + file + "," + Cache_num + ","+first;
 						}
 						if (fromUser != null) {
 							//System.out.println("Client - " + fromUser);
